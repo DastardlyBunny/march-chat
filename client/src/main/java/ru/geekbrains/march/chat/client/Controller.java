@@ -1,7 +1,6 @@
 package ru.geekbrains.march.chat.client;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -9,10 +8,15 @@ import javafx.scene.layout.HBox;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Controller implements Initializable {
     @FXML
@@ -104,7 +108,7 @@ public class Controller implements Initializable {
                             }
                             continue;
                         }
-                        msgArea.appendText(msg + "\n");
+                        msgArea.setText(getLogData());
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -116,6 +120,29 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             showErrorAlert("Невозможно подключиться к серверу");
         }
+    }
+
+    public String getLogData() {
+        Stream<String> lines = null;
+        String data = "";
+        try {
+            File file = new File("log.txt");
+            if (!file.exists()) {
+                if (!file.createNewFile()) {
+                    throw new IOException("Server: Не удалось создать файл логов");
+                }
+            }
+            lines = Files.lines(Paths.get("log.txt"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (lines != null) {
+            data = lines.collect(Collectors.joining("\n"));
+            lines.close();
+        }
+
+        return data;
     }
 
     public void sendMsg() {

@@ -34,13 +34,17 @@ public class Server {
 
     public synchronized void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
-        broadcastMessage("Клиент " + clientHandler.getUsername() + " вошел в чат");
+        String message = "Клиент " + clientHandler.getUsername() + " вошел в чат";
+        broadcastMessage(message);
+        clientHandler.log(message);
         broadcastClientsList();
     }
 
     public synchronized void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
-        broadcastMessage("Клиент " + clientHandler.getUsername() + " вышел из чата");
+        String message = "Клиент " + clientHandler.getUsername() + " вышел из чата";
+        broadcastMessage(message);
+        clientHandler.log(message);
         broadcastClientsList();
     }
 

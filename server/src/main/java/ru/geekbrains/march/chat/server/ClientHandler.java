@@ -1,8 +1,6 @@
 package ru.geekbrains.march.chat.server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
 
@@ -38,7 +36,6 @@ public class ClientHandler {
                         sendMessage(login);
                         sendMessage(password);
 
-
                         String userNickname = server.getAuthenticationProvider().getNicknameByLoginAndPassword(login, password);
                         if (userNickname == null) {
                             sendMessage("/login_failed Введен некорректный логин/пароль");
@@ -62,6 +59,7 @@ public class ClientHandler {
                         continue;
                     }
                     server.broadcastMessage(username + ": " + msg);
+                    log(username + ": " + msg);
                 }
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
@@ -111,6 +109,29 @@ public class ClientHandler {
         } catch (IOException e) {
             disconnect();
         }
+    }
+
+    public void log(String message) {
+        try {
+            if (!message.startsWith("/")) {
+                File file = new File("log.txt");
+                if (!file.exists()) {
+                    if (!file.createNewFile()) {
+                        throw new Exception("Server: Не удалось создать файл логов");
+                    }
+                }
+                try (FileWriter writer = new FileWriter("log.txt", true)) {
+                    writer.write(message);
+                    writer.append('\n');
+                    writer.flush();
+                } catch (IOException ex) {
+                    throw new Exception("Server: Не удалось записать данные в файл логов");
+                }
+            }
+        } catch (Exception e) {
+            sendMessage(e.getMessage());
+        }
+
     }
 
     public void disconnect() {
